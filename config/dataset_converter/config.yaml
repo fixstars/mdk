@@ -1,0 +1,45 @@
+mode: sft
+inputs:
+  name: null  # specify path or list[path]
+output:
+  basedir: null  # auto complete by hydra if not specified
+  dataset: dataset.jsonl
+  experiment_log: experiment_log.json
+  splitted_text: splitted.txt
+splitter:
+  min_chars: 1000
+  long_char_thres: 2000
+  num_duplicate: 300
+  dump_md_file: false  # save pandoc -> md result
+prompt:
+  template: ja/qa_zeroshot_json.jinja2
+  topic: C++  # replace {{topic}} area in template
+  with_examples:  # replace {{examples}} area in template
+    reference: []
+    num_sample: 1
+llm:
+  provider: vllm # select from ["huggingface", "deepspeed", "api", "vllm"]
+  model: tokyotech-llm/Swallow-MX-8x7b-NVE-v0.1
+  max_tokens: 4096
+  generate:
+    num_return_sequences: 4
+    max_new_tokens: 1024
+    temperature: 1  # set value in [0, 1]. larger is more random.
+    top_p: 0.95  # set value in [0, 1]. larger is more random.
+    do_sample: true
+  batch_size: 16  # valid for ["huggingface", "deepspeed"] providers
+  api_base_url: http://localhost:8001/v1
+  api_key: hoge
+  vllm_tensor_parallel_size: 2
+  vllm_max_num_seqs: 256
+vision_llm:
+  model: llava-hf/llava-1.5-7b-hf
+  prompt: "USER: <context> <image>\nWhat are these?\nASSISTANT: "
+  image_token: "<image>"
+  max_new_tokens: 256
+seed: 0
+rank: 0
+world_size: 1
+hydra:
+  run:
+    dir: ./outputs/dataset_converter/${now:%Y-%m-%d}/${now:%H-%M-%S}

@@ -1,0 +1,48 @@
+default_language_version:
+  node: 20.15.1
+repos:
+- repo: https://github.com/pre-commit/pre-commit-hooks
+  rev: v4.5.0
+  hooks:
+    - id: trailing-whitespace
+      exclude: .patch
+    - id: end-of-file-fixer
+    - id: check-yaml
+      exclude: template*
+      args: [--allow-multiple-documents]
+    - id: check-added-large-files
+      args: [--maxkb=1024]
+    - id: file-contents-sorter
+      files: .*requirements.txt
+      args: [--unique, --ignore-case]
+- repo: https://github.com/tcort/markdown-link-check
+  rev: v3.12.2
+  hooks:
+    - id: markdown-link-check
+      args: [-q, -c, .internal/markdown_link_check.json]
+- repo: https://github.com/psf/black
+  rev: 23.11.0
+  hooks:
+    - id: black
+- repo: https://github.com/pycqa/isort
+  rev: 5.12.0
+  hooks:
+    - id: isort
+      args: [--settings-path, .internal/isort.cfg]
+- repo: https://github.com/pycqa/flake8
+  rev: 6.1.0
+  hooks:
+    - id: flake8
+      args: [--config, .internal/flake8]
+- repo: https://github.com/igorshubovych/markdownlint-cli
+  rev: v0.41.0
+  hooks:
+  - id: markdownlint
+    args: [--disable, line_length, -f, -i, .gitlab, -c, .internal/markdownlint.yaml]
+- repo: local
+  hooks:
+    - id: mdk-markdown-formatter
+      name: mdk markdown formatter
+      entry: python .internal/check_markdown.py
+      language: python
+      types: [markdown]

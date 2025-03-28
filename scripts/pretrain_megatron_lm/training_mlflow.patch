@@ -1,0 +1,35 @@
+--- megatron/training/training.py	2025-02-05 16:28:37.936580298 +0900
++++ megatron/training/training_mlflow.py	2025-02-05 16:28:00.077571708 +0900
+@@ -196,6 +196,32 @@ def pretrain(train_valid_test_dataset_pr
+     args = get_args()
+     timers = get_timers()
+ 
++    # MLflow logging and specify output dir.
++    import re
++    import torch.distributed as dist
++    import mlflow
++    from mlflow.utils.mlflow_tags import MLFLOW_RUN_NAME
++
++    TCPSTORE_HOST = "127.0.0.1"
++    TCPSTORE_PORT = 1234
++    OUTPUT_FORMAT = "%Y-%m-%d/%H-%M-%S"
++
++    if not re.search(r'\d{4}-\d{2}-\d{2}/\d{2}-\d{2}-\d{2}$', args.save):
++        world_size = int(os.environ["LOCAL_RANK"])
++        if os.environ["LOCAL_RANK"] == "0":
++            store = dist.TCPStore(
++                TCPSTORE_HOST, TCPSTORE_PORT, world_size, is_master=True
++            )
++            args.save = str(os.path.join(args.save, datetime.now().strftime(OUTPUT_FORMAT)))
++            store.set("output_dir", args.save)
++            mlflow.set_tag(MLFLOW_RUN_NAME, args.save)
++            mlflow.log_params(dict(sorted(vars(args).items())))
++        else:
++            store = dist.TCPStore(
++                TCPSTORE_HOST, TCPSTORE_PORT, world_size, is_master=False
++            )
++            args.save = store.get("output_dir").decode()
++
+     if args.log_progress:
+         append_to_progress_log("Starting job")
+ 

@@ -1,0 +1,38 @@
+mode: evaluate
+inputs:
+  name: null  # specify experiment_log.json file from dataset_converter
+output:
+  basedir: null  # auto complete by hydra if not specified
+  dataset: dataset.jsonl
+  experiment_log: experiment_log.json
+  confusion_matrix: null
+prompt:
+  template: ja/verify_dataset_find_error.jinja2
+  topic: C++  # replace {{topic}} area in template
+  with_examples:  # replace {{examples}} area in template
+    reference: []
+    num_sample: 1
+llm:
+  provider: vllm # select from ["huggingface", "deepspeed", "api", "vllm", "vllm_multiprocessing"]
+  model: null
+  max_ok_error_threshold: null
+  max_tokens: 4096
+  generate:
+    num_return_sequences: 2
+    max_new_tokens: 1024
+    temperature: 1  # set value in [0, 1]. larger is more random.
+    top_p: 0.95  # set value in [0, 1]. larger is more random.
+    do_sample: true
+  batch_size: 16  # valid for ["huggingface", "deepspeed"] providers
+  api_base_url: http://localhost:8001/v1
+  api_key: hoge
+  vllm_gpus: "0,1"
+  vllm_tensor_parallel_size: 2
+  vllm_max_num_seqs: 256
+  coefficient_yaml_path: null
+seed: 0
+rank: 0
+world_size: 1
+hydra:
+  run:
+    dir: ./outputs/dataset_evaluator/${now:%Y-%m-%d}/${now:%H-%M-%S}

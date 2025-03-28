@@ -1,0 +1,10 @@
+defaults:
+  - base
+  - _self_
+
+tokenizer:
+  pretrained_model_name_or_path: Xwin-LM/Xwin-LM-7B-V0.2
+model:
+  pretrained_model_name_or_path: Xwin-LM/Xwin-LM-7B-V0.2
+training_args:
+  deepspeed: config/trainer/deepspeed_config_zero2.json # deepspeed設定

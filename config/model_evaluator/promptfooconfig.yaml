@@ -1,0 +1,20 @@
+description: Model Evaluation using QA
+providers:
+  - id: openai:completion:finetuned
+    config:
+      apiBaseUrl: http://localhost:8001/v1
+      apiKey: hoge
+  - id: openai:completion:baseline
+    config:
+      apiBaseUrl: http://localhost:8002/v1
+      apiKey: hoge
+defaultTest:
+  options:
+    provider:
+      id: openai:completion:evaluator
+      config:
+        apiBaseUrl: http://localhost:8003/v1
+        apiKey: hoge
+    rubricPrompt:
+      'USER: The output below may contains errors compared to the model answer.\nOutput: {{ output }}\nAnswer: {{ rubric }}\n Please indicate the error in the format below. {"pass": false, "reason": (string)}. If you can not find the error, write {"pass": true, "reason": (string)} instead. \n Assistant: '
+sharing: false

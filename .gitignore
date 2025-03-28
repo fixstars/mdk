@@ -1,0 +1,15 @@
+.dvcignore
+.venv
+.vscode
+mlruns
+multirun
+outputs
+__pycache__
+scripts/pretrain_megatron_lm/convert_checkpoint/convert.py
+
+# for fastchat server
+controller.log*
+*-conv.json
+model_worker*.log*
+gradio_web_server*.log*
+openai_api_server.log*

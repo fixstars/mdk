@@ -1,0 +1,19 @@
+{
+    "ignorePatterns": [
+      {
+        "pattern": "http://localhost"
+      },
+      {
+        "pattern": "https://huggingface.co/join"
+      },
+      {
+        "pattern": "^#"
+      }
+    ],
+    "replacementPatterns": [
+      {
+        "pattern": "^/",
+        "replacement": "{{BASEURL}}/doc/docs/"
+      }
+    ]
+}

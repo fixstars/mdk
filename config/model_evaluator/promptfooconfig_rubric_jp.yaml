@@ -1,0 +1,20 @@
+description: Model Evaluation using QA
+providers:
+  - id: openai:completion:finetuned
+    config:
+      apiBaseUrl: http://localhost:8001/v1
+      apiKey: hoge
+  - id: openai:completion:baseline
+    config:
+      apiBaseUrl: http://localhost:8002/v1
+      apiKey: hoge
+defaultTest:
+  options:
+    provider:
+      id: openai:completion:evaluator
+      config:
+        apiBaseUrl: http://localhost:8003/v1
+        apiKey: hoge
+    rubricPrompt:
+      'ユーザー: 言語モデルから得られた出力は、模範解答と比べて内容的な誤りを含んでいます。出力: {{output}}\n 模範解答: {{ rubric }}\n 誤りの箇所とその理由を次のフォーマットで記載してください。 {"pass": false, "reason": (文字列)} \n もし誤りが無ければ代わりに次のフォーマットで出力してください {"pass": true, "reason": (文字列)} \n アシスタント: '
+sharing: false

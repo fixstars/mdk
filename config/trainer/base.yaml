@@ -1,0 +1,41 @@
+mode: sft
+tokenizer:
+  pretrained_model_name_or_path: null  # モデル名
+model:
+  pretrained_model_name_or_path: null  # モデル名
+lora_config:
+  task_type: CAUSAL_LM
+  inference_mode: false
+  r: 256
+  lora_alpha: 32
+  lora_dropout: 0.1
+  target_modules: all
+dataset:
+  path: text
+  data_files: null  # データセットへのパス
+prompt:
+  template: null  # プロンプトテンプレート
+training_args:
+  output_dir: null  # 出力パス
+  num_train_epochs: 100  # エポック数
+  per_device_train_batch_size: 16  # 学習バッチサイズ
+  per_device_eval_batch_size: 16  # 評価バッチサイズ
+  gradient_accumulation_steps: 1  # 勾配の累積ステップ数
+  gradient_checkpointing: true  # 勾配チェックポイント
+  optim: adafactor  # オプティマイザの種類
+  deepspeed: config/trainer/deepspeed_config_zero3.json # deepspeed設定
+  logging_strategy: steps # or epoch
+  logging_steps: 100
+  save_strategy: steps # or epoch
+  save_steps: 500
+  eval_steps: 1000
+  save_total_limit: 3 # 直近3チェックポイントだけ残す
+trainer:  # needs change code manually in DPO mode
+  dataset_text_field: text
+  max_seq_length: 256
+  neftune_noise_alpha: 5
+  packing: false
+train:
+  resume_from_checkpoint: false
+output_dir_template: ./outputs/trainer/%Y-%m-%d/%H-%M-%S
+zero3_leaf_modules: null

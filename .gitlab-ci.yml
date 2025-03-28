@@ -1,0 +1,59 @@
+stages:
+  - format
+  - build
+  - test
+  - deploy
+
+variables:
+  NODE_IMAGE: node:lts
+  DOC_DIR: doc
+  DOC_BUILD_DIR: ${DOC_DIR}/build
+  DOC_PUBLIC_DIR: public
+
+default:
+  tags:
+    - docker
+
+check-format:
+  stage: format
+  image: python:3.10
+  before_script:
+    - python3 -m pip install pre-commit
+    - pre-commit install
+  script:
+    - pre-commit run -c .internal/pre-commit-config.yaml --all-files
+  after_script:
+    - git diff
+
+pytest-mdk:
+  stage: test
+  image: python:3.10
+  before_script:
+    - python3 -m pip install -U -r test_requirements.txt
+  script:
+    - python3 -m pytest test
+
+build-doc:
+  stage: build
+  image: ${NODE_IMAGE}
+  script:
+    - cd ${DOC_DIR}
+    - npm ci
+    - npm run build
+  artifacts:
+    paths:
+      - ${DOC_BUILD_DIR}
+    expire_in: 1 day # 必要になったら再実行して
+
+pages:
+  stage: deploy
+  image: ${NODE_IMAGE}
+  script:
+    - mv ${DOC_BUILD_DIR} ${DOC_PUBLIC_DIR}
+  artifacts:
+    paths:
+      - ${DOC_PUBLIC_DIR}
+  dependencies:
+    - build-doc
+  rules:
+    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH # マージされたら展開する

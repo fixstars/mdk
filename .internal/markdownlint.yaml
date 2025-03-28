@@ -1,0 +1,3 @@
+no-inline-html:
+  allowed_elements:
+    - br # 強制改行のために必要（末尾空白は事故で入る可能性があるのでこちらにする）

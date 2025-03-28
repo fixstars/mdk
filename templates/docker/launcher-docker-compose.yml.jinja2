@@ -1,0 +1,85 @@
+services:
+{% for gpu in GPUS %}
+  vllm{{ loop.index }}:
+    image: vllm/vllm-openai:latest
+    container_name: {{ CONTAINER_BASENAME }}-vllm{{ loop.index }}
+    volumes:
+      - {% if MODELS[loop.index0][:1] == '/' %}{{ MODELS[loop.index0] }}:{% set path_parts = MODELS[loop.index0].split('/') %}/root/{{ path_parts[-1] }}
+      {% else %}/data/cache/huggingface/hub:/root/.cache/huggingface/hub{% endif %}
+
+      {% if HF_TOKEN_PATH is defined %}- type: bind
+        source: {{ HF_TOKEN_PATH }}
+        target: /root/.cache/huggingface/token
+        read_only: true{% endif %}
+
+      {% if TEMPLATES is defined %}- {{ TEMPLATES[loop.index0] }}:/root/vllm.jinja{% endif %}
+
+    command:
+      - --model
+      {% if MODELS[loop.index0][:1] == '/' %}{% set path_parts = MODELS[loop.index0].split('/') %}- /root/{{ path_parts[-1] }}{% else %}- {{ MODELS[loop.index0] }}{% endif %}
+
+      {% if TEMPLATES is defined %}- --chat-template
+      - /root/vllm.jinja{% endif %}
+
+      - -tp
+      - '{{ gpu | length }}'
+      {% if GPU_MEMORY_UTILIZATION is defined %}- --gpu-memory-utilization
+      - '{{ GPU_MEMORY_UTILIZATION }}'{% endif %}
+
+      - --distributed-executor-backend
+      - ray
+    shm_size: 10.24gb
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              device_ids: {{ gpu }}
+              capabilities: [ gpu ]
+    restart: unless-stopped
+    environment:
+      - PYTORCH_CUDA_ALLOC_CONF=max_split_size_mb:128
+{% endfor %}
+  litellm:
+    container_name: {{ CONTAINER_BASENAME }}-litellm
+    build:
+      context: .
+      args:
+        target: runtime
+    image: ghcr.io/berriai/litellm:main-latest
+    depends_on:
+{% for gpu in GPUS %}
+      - vllm{{ loop.index }}
+{% endfor %}
+    ports:
+      - {{ LITELLM_PORT }}:4000
+    volumes:
+      - ./litellm-config.yml:/app/config.yaml
+    command:
+      - --config
+      - /app/config.yaml
+      - --port
+      - "4000"
+      - --num_workers
+      - '{{ NUM_WORKERS }}'
+    restart: unless-stopped
+  open-webui:
+    image: ghcr.io/open-webui/open-webui:${WEBUI_DOCKER_TAG-main}
+    container_name: {{ CONTAINER_BASENAME }}-open-webui
+    volumes:
+      - open-webui:/app/backend/data
+    depends_on:
+      - litellm
+    ports:
+      - {{ OPEN_WEBUI_PORT }}:8080
+    environment:
+      - OPENAI_API_BASE_URL=http://litellm:4000
+      - ENABLE_OLLAMA_API=False
+      - OPENAI_API_KEY=None
+      - WEBUI_SECRET_KEY=
+      - WEBUI_AUTH={{ WEBUI_AUTH }}
+    restart: unless-stopped
+
+volumes:
+  open-webui:
+    name: {{ CONTAINER_BASENAME }}-open-webui

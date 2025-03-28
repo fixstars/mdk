@@ -1,0 +1,19 @@
+defaults:
+  - base
+  - _self_
+
+tokenizer:
+  pretrained_model_name_or_path: tokyotech-llm/Llama-3-Swallow-8B-Instruct-v0.1
+model:
+  pretrained_model_name_or_path: tokyotech-llm/Llama-3-Swallow-8B-Instruct-v0.1
+dataset:
+  path: json
+prompt:
+  template: ja/train_llama3_8b.jinja2
+trainer:
+  dataset_text_field: null
+training_args:
+  num_train_epochs: 10  # エポック数
+  per_device_train_batch_size: 4  # 学習バッチサイズ
+  per_device_eval_batch_size: 4  # 評価バッチサイズ
+  learning_rate: 5e-05

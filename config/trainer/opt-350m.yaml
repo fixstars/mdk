@@ -1,0 +1,10 @@
+defaults:
+  - base
+  - _self_
+
+tokenizer:
+  pretrained_model_name_or_path: facebook/opt-350m # モデル名
+model:
+  pretrained_model_name_or_path: facebook/opt-350m # モデル名
+training_args:
+  deepspeed: config/trainer/deepspeed_config_zero2.json # deepspeed設定

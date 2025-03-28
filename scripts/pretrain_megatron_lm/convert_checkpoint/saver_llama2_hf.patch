@@ -1,0 +1,29 @@
+--- saver_llama2_hf.py	2024-09-04 18:38:52.023371333 +0900
++++ Megatron-LM/tools/checkpoint/saver_llama2_hf.py	2024-09-05 13:19:40.252739612 +0900
+@@ -9,6 +9,10 @@
+                        help='Base directory of megatron checkpoint')
+ 
+ def save_checkpoint(queue: mp.Queue, args):
++    import sys
++    if args.megatron_path is not None:
++        sys.path.insert(0, args.megatron_path)
++
+     def queue_get(name=None):
+         val = queue.get()
+         if val == "exit":
+@@ -52,7 +56,7 @@
+         torch_dtype             = torch_dtype,
+         model_type              = "llama",
+         architectures           = ['LlamaForCausalLM'],
+-        transformers_version    = "4.33.1",
++        transformers_version    = "4.44.2",
+         )
+     llama_conf.save_pretrained(args.save_dir)
+ 
+@@ -90,3 +94,5 @@
+         print(f'Check passed. {CHECK_EQUAL_WITH_HF} and {args.save_dir} are equal.')
+ 
+     torch.save(state_dict, os.path.join(args.save_dir, 'pytorch_model.bin'))
++    print("Done!")
++    
+\ No newline at end of file

@@ -1,0 +1,10 @@
+defaults:
+  - config
+  - _self_
+
+mode: dpo
+prompt:
+  template: ja/dpo_zeroshot_json.jinja2
+llm:
+  generate:
+    num_return_sequences: 1

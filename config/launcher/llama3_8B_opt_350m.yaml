@@ -1,0 +1,17 @@
+GPUS:
+  - [ '0', '1' ]
+  - [ '2' ]
+GPU_MEMORY_UTILIZATION: 0.9
+LITELLM_PORT: 4000
+MODELS:
+  - meta-llama/Meta-Llama-3-8B-Instruct
+  - facebook/opt-350m
+MODEL_NAMES:
+  - Llama-3-8B
+  - opt-350m
+NUM_WORKERS: 8
+OPEN_WEBUI_PORT: 3000
+TEMPLATES:
+  - ../../../templates/ja/launcher_llama3.jinja2
+  - ../../../templates/ja/launcher_chatml.jinja2
+WEBUI_AUTH: False

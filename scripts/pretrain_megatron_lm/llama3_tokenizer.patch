@@ -1,0 +1,85 @@
+diff --git a/megatron/training/tokenizer/tokenizer.py b/megatron/training/tokenizer/tokenizer.py
+index f9311881..c60d6f0e 100644
+--- a/megatron/training/tokenizer/tokenizer.py
++++ b/megatron/training/tokenizer/tokenizer.py
+@@ -559,21 +559,19 @@ class _Llama2Tokenizer(_SentencePieceTokenizer):
+ 
+ def create_llama3_tokenizer(*args, **kwargs):
+ 
+-    try:
+-        from llama.tokenizer import Tokenizer as Llama3Tokenizer
+-    except ImportError:
+-        raise ImportError("Module 'llama' is required but not installed.")
+-
+-    class _Llama3Tokenizer(Llama3Tokenizer):
++    class _Llama3Tokenizer(MegatronTokenizer):
+         def __init__(self, *args, **kwargs):
+             super().__init__(*args, **kwargs)
++
++            from llama.tokenizer import Tokenizer as Llama3Tokenizer
++            self.tokenizer = Llama3Tokenizer(*args, **kwargs)
+ 
+         def instruct_tokenize(self, s: str, bos=True, eos=False):
+             '''Default args for text completion, not chat/dialog.'''
+ 
+             assert type(s) is str
+ 
+-            t = self.encode(s, bos=bos, eos=eos, allowed_special='all')
++            t = self.tokenizer.encode(s, bos=bos, eos=eos, allowed_special='all')
+             return t
+ 
+         def tokenize(self, s: str, bos=True, eos=False):
+@@ -581,12 +579,20 @@ def create_llama3_tokenizer(*args, **kwargs):
+ 
+             assert type(s) is str
+ 
+-            t = self.encode(s, bos=bos, eos=eos, allowed_special='all')
++            t = self.tokenizer.encode(s, bos=bos, eos=eos, allowed_special='all')
+             return t
+ 
+         def detokenize(self, ids):
+-            return self.decode(ids)
++            return self.tokenizer.decode(ids)
+ 
++        @property
++        def vocab(self):
++            return self.tokenizer.vocab
++
++        @property
++        def inv_vocab(self):
++            return self.tokenizer.inv_vocab
++
+         @property
+         def cls(self):
+             return -1
+@@ -601,7 +607,7 @@ def create_llama3_tokenizer(*args, **kwargs):
+ 
+         @property
+         def eod(self):
+-            return self.eos_id
++            return self.tokenizer.eos_id
+ 
+         @property
+         def additional_special_tokens_ids(self):
+@@ -609,7 +615,7 @@ def create_llama3_tokenizer(*args, **kwargs):
+ 
+         @property
+         def vocab_size(self):
+-            return self.model.n_vocab
++            return self.tokenizer.model.n_vocab
+ 
+     return _Llama3Tokenizer(*args, **kwargs)
+ 
+diff --git a/tools/checkpoint/loader_llama_mistral.py b/tools/checkpoint/loader_llama_mistral.py
+index ce4c480a..5ea298db 100644
+--- a/tools/checkpoint/loader_llama_mistral.py
++++ b/tools/checkpoint/loader_llama_mistral.py
+@@ -561,7 +561,7 @@ def _load_checkpoint(queue, args):
+         except ImportError:
+             raise AssertionError("Module 'llama' is required but not installed.")
+         tokenizer = Llama3Tokenizer(margs.tokenizer_model)
+-        md.true_vocab_size = tokenizer.vocab_size
++        md.true_vocab_size = tokenizer.model.n_vocab
+     else:
+         md.true_vocab_size = None
+ 

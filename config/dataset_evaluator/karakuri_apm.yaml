@@ -1,0 +1,18 @@
+defaults:
+  - base
+  - _self_
+
+prompt:
+  template: ja/verify_dataset_by_karakuri_apm.jinja2
+  topics:
+      - "[ATTR_1]"
+      - "[ATTR_2]"
+llm:
+  provider: vllm_multiprocessing
+  model: karakuri-ai/karakuri-lm-7b-apm-v0.1
+  max_ok_error_threshold: -0.15
+  vllm_gpus: "0,1"
+  generate:
+    num_return_sequences: 10
+    max_new_tokens: 32
+  coefficient_yaml_path: config/dataset_evaluator/coefficient.yaml

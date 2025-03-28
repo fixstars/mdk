@@ -1,0 +1,18 @@
+defaults:
+  - base
+  - _self_
+
+tokenizer:
+  pretrained_model_name_or_path: meta-llama/Meta-Llama-3-70B-Instruct
+model:
+  pretrained_model_name_or_path: meta-llama/Meta-Llama-3-70B-Instruct
+dataset:
+  path: json
+prompt:
+  template: ja/train_llama3_70b.jinja2
+trainer:
+  dataset_text_field: null
+training_args:
+  num_train_epochs: 10  # エポック数
+  per_device_train_batch_size: 4  # 学習バッチサイズ
+  per_device_eval_batch_size: 4  # 評価バッチサイズ

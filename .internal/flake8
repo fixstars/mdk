@@ -1,0 +1,11 @@
+[flake8]
+max_line_length = 100
+extend-ignore =
+    # to clash with W504. PEP8 recommends W504.
+    W503,
+    # Implementing formatter in black.
+    E501,
+    # whitespace before ':'
+    E203,
+    # do not assign a lambda expression, use a def
+    E731
